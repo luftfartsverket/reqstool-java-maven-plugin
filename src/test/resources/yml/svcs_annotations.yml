@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://schemas.lfv.se/sysdev/requirements-tool/v1/annotations.schema.json
+---
+requirement_annotations:
+  tests:
+    SVC_001:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.SVCsExample"
+    SVC_002:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.SVCsExample"
+    SVC_003:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.SVCsExample"
+      - elementKind: "METHOD"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.SVCsExample.someMethod"

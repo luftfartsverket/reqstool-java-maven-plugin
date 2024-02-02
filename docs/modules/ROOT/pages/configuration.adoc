@@ -1,0 +1,18 @@
+== Configuration
+
+Configure this <configuration> block into the <build> section of  pom.xml file to customize how your plugin behaves during the Maven build process.
+
+=== requirementsAnnotationsFile
+
+The `requirementsAnnotationsFile` parameter specifies the path to the annotations file.
+
+```
+<configuration>
+<requirementsAnnotationsFile>
+${project.build.directory}/generated-sources/annotations/resources/annotations.yml
+</requirementsAnnotationsFile>
+</configuration>
+
+```
+
+

@@ -1,0 +1,29 @@
+---
+requirement_annotations:
+  implementations:
+    REQ_001:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.RequirementsExample"
+    REQ_002:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.RequirementsExample"
+    REQ_003:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.RequirementsExample"
+      - elementKind: "METHOD"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.RequirementsExample.someMethod1"
+    REQ_004:
+      - elementKind: "FIELD"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.RequirementsExample.field"
+  tests:
+    SVC_001:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.SVCsExample"
+    SVC_002:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.SVCsExample"
+    SVC_003:
+      - elementKind: "CLASS"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.SVCsExample"
+      - elementKind: "METHOD"
+        fullyQualifiedName: "se.lfv.reqstool.annotations.SVCsExample.someMethod"
