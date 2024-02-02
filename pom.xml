@@ -12,7 +12,7 @@
 
     <name>${project.artifactId}</name>
     <description>Reqstool - Maven Plugin</description>
-    <url>https://github.com/Luftfartsverket/reqstool-maven-plugin</url>
+    <url>https://github.com/Luftfartsverket/reqstool-java-maven-plugin</url>
     <scm>
         <connection>scm:git:https://github.com/Luftfartsverket/reqstool-java-maven-plugin.git</connection>
         <url>https://github.com/Luftfartsverket/reqstool-java-maven-plugin</url>
@@ -99,26 +99,6 @@
     <build>
 
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>sonar-project.properties</file>
-                            </files>
-                            <quiet>true</quiet>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -237,81 +217,6 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.sonarsource.scanner.maven</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.10.0.2594</version>
-                </plugin>
-
-                <!--This
-                plugin's configuration is used to store Eclipse m2e settings only. It has
-                no influence on the Maven build itself. The vs-code java extention has trouble to
-                build with these plugin executions
-                see: https://www.eclipse.org/m2e/documentation/m2e-execution-not-covered.html -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.apache.maven.plugins</groupId>
-                                        <artifactId>maven-dependency-plugin</artifactId>
-                                        <versionRange>[3.3.0,)</versionRange>
-                                        <goals>
-                                            <goal>unpack</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>com.googlecode.maven-download-plugin</groupId>
-                                        <artifactId>download-maven-plugin</artifactId>
-                                        <versionRange>[1.6.8,)</versionRange>
-                                        <goals>
-                                            <goal>wget</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.cyclonedx</groupId>
-                                        <artifactId>cyclonedx-maven-plugin</artifactId>
-                                        <versionRange>[2.7.3,)</versionRange>
-                                        <goals>
-                                            <goal>makeAggregateBom</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>io.spring.javaformat</groupId>
-                                        <artifactId>spring-javaformat-maven-plugin</artifactId>
-                                        <versionRange>[0.0.38,)</versionRange>
-                                        <goals>
-                                            <goal>apply</goal>
-                                            <goal>validate</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
                 <!-- Maven GPG Plugin for signing artifacts -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -327,36 +232,26 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.11</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
-    <profiles>
-        <profile>
-            <id>code-coverage</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.11</version>
-                        <executions>
-                            <execution>
-                                <id>prepare-agent</id>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
