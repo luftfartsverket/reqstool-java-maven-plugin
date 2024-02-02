@@ -51,7 +51,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 	public static final String REQSTOOL_DIRECTORY = "";
 
-	protected static final String YAML_LANG_SERVER_SCHEMA_INFO = "# yaml-language-server: $schema=https://schemas.lfv.se/sysdev/requirements-tool/v1/annotations.schema.json";
+	protected static final String YAML_LANG_SERVER_SCHEMA_INFO = "# yaml-language-server: $schema=https://raw.githubusercontent.com/Luftfartsverket/reqstool-client/main/src/reqstool/resources/schemas/v1/annotations.schema.json";
 
 	protected static final ObjectMapper yamlMapper;
 
