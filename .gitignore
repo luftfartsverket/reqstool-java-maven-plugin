@@ -1,87 +1,47 @@
-# Maven target directory
-target/
+# Created by https://www.toptal.com/developers/gitignore/api/java,maven
+# Edit at https://www.toptal.com/developers/gitignore?templates=java,maven
 
-# IDE files
-.idea/
-*.iml
-*.iws
-*.ipr
-
-# Eclipse files
-.classpath
-.project
-.settings/
-
-# NetBeans files
-nb-configuration.xml
-nbactions.xml
-nb-configuration.xml
-
-# Maven build files
-pom.xml.backup
-pom.xml.releaseBackup
-release.properties
-pom.xml.versionsBackup
-pom.xml.next
-
-# Maven release plugin
-release.properties
-target/
-
-# Logs
-*.log
-log/
-logs/
-
-# IntelliJ IDEA
-.idea/
-
-# Mac OS
-.DS_Store
-
-# Maven Wrapper
-.mvn/wrapper/
-
-# Compiled bytecode
+### Java ###
+# Compiled class file
 *.class
+
+# Log file
+*.log
 
 # Package Files #
 *.jar
 *.war
+*.nar
 *.ear
-*.log
+*.zip
+*.tar.gz
+*.rar
 
-# IntelliJ
-.idea/
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+replay_pid*
 
-# Gradle
-.gradle/
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+# https://github.com/takari/maven-wrapper#usage-without-binary-jar
+.mvn/wrapper/maven-wrapper.jar
 
-# User-specific files
-*.iml
-*.suo
-*.user
-*.userosscache
-*.sln
-*.swp
-*.swo
-*.tmproj
-*.xcworkspace/
-
-# Terraform
-.terraform/
-
-# VS Code
-.vscode/
+# Eclipse m2e generated files
+# Eclipse Core
 .project
+# JDT-specific (Eclipse Java Development Tools)
 .classpath
 
-# Maven Wrapper
-.mvn/wrapper/
+# End of https://www.toptal.com/developers/gitignore/api/java,maven
 
-# Spring Boot
-target/
-!.mvn/wrapper/maven-wrapper.jar
+### VisualStudioCode ###
+.vscode/*
 
-# Thin WAR files
-*.war
