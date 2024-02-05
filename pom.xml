@@ -42,7 +42,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <maven.compiler.source>1.8</maven.compiler.source> <!-- for Maven Compiler -->
+        <!-- for Maven Compiler -->
+        <maven.compiler.source>1.8</maven.compiler.source> 
         <maven.compiler.target>1.8</maven.compiler.target>
 
     </properties>
@@ -170,6 +171,10 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>3.3.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>3.11.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

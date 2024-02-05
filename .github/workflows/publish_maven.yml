@@ -11,6 +11,7 @@ jobs:
     name: Check linting
     uses: ./.github/workflows/linting.yml
   publish:
+    needs: linting
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,8 +26,8 @@ jobs:
           server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-      # - name: Publish to the Maven Central Repository
-      #   run: mvn --batch-mode deploy
-      #   env:
-      #     MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-      #     MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+      - name: Publish to the Maven Central Repository
+        run: mvn --batch-mode deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
