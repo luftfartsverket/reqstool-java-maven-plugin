@@ -2,6 +2,9 @@ name: Publish package to the Maven Central Repository
 on:
   release:
     types: [created]
+  push:
+    branches:
+      - "feature/*"
 
 jobs:
   linting:
@@ -21,7 +24,3 @@ jobs:
     steps:
       - name: Publish to the Maven Central Repository
         run: mvn clean deploy
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.SYSDEV_PRIVATE_GPG_KEY_PASSPHRASE }}
