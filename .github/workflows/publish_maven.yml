@@ -2,32 +2,23 @@ name: Publish package to the Maven Central Repository
 on:
   release:
     types: [created]
-  push:
-    branches:
-      - feature/initial
 
 jobs:
   linting:
     name: Check linting
     uses: ./.github/workflows/linting.yml
+  build:
+    name: Build and run tests
+    uses: ./.github/workflows/build.yml
   publish:
-    needs: linting
+    needs:
+      - linting
+      - build
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v3
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          server-id: central
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.SYSDEV_PRIVATE_GPG_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - name: Publish to the Maven Central Repository
         run: mvn clean deploy
         env:
