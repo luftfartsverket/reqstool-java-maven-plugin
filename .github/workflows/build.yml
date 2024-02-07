@@ -15,13 +15,4 @@ jobs:
         with:
           java-version: "21"
           distribution: "temurin"
-          server-id: central
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.SYSDEV_PRIVATE_GPG_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - run: mvn clean verify
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.SYSDEV_PRIVATE_GPG_KEY_PASSPHRASE }}
