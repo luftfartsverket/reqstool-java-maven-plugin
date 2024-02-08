@@ -4,11 +4,11 @@ on:
     types: [created]
 
 jobs:
-  linting:
-    name: Check linting
-    uses: ./.github/workflows/lint.yml
+  build:
+    name: Reuse build
+    uses: ./.github/workflows/build.yml
   publish:
-    needs: linting
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
