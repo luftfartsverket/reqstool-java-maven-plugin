@@ -1,16 +1,115 @@
 == Configuration
 
-Configure this <configuration> block into the <build> section of  pom.xml file to customize how your plugin behaves during the Maven build process.
+To configure the plugin add a <configuration> block for the plugin under the <build> in pom.xml
 
 === requirementsAnnotationsFile
 
-The `requirementsAnnotationsFile` parameter specifies the path to the annotations file.
+The `requirementsAnnotationsFile` parameter specifies the path to the requirements annotations file.
+Defaults to the value set below. 
 
 ```
 <configuration>
 <requirementsAnnotationsFile>
 ${project.build.directory}/generated-sources/annotations/resources/annotations.yml
 </requirementsAnnotationsFile>
+</configuration>
+
+```
+
+=== svcsAnnotationsFile
+
+The `svcsAnnotationsFile` parameter specifies the path to the svcs annotations file.
+Defaults to the value set below. 
+
+```
+<configuration>
+<svcsAnnotationsFile>
+${project.build.directory}/generated-test-sources/test-annotations/resources/annotations
+</svcsAnnotationsFile>
+</configuration>
+
+```
+
+=== outputDirectory
+
+The `outputDirectory` parameter specifies the path to where to put the generated output
+Defaults to the value set below. 
+
+```
+<configuration>
+<outputDirectory>
+${project.build.directory}/reqstool
+</outputDirectory>
+</configuration>
+
+```
+
+=== datasetPath
+
+The `datasetPath` parameter specifies the path to the dataset
+Defaults to the value set below. 
+
+```
+<configuration>
+<datasetPath>
+${project.basedir}/reqstool
+</datasetPath>
+</configuration>
+
+```
+
+=== failsafeReportsDir
+
+The `failsafeReportsDir` parameter specifies the path to where the failsafe reports are found. 
+Defaults to the value set below. 
+
+```
+<configuration>
+<failsafeReportsDir>
+${project.build.directory}/failsafe-reports
+</failsafeReportsDir>
+</configuration>
+
+```
+
+=== surefireReportsDir
+
+The `surefireReportsDir` parameter specifies the path to where the surefire reports are found. 
+Defaults to the value set below. 
+
+```
+<configuration>
+<surefireReportsDir>
+${project.build.directory}/surefire-reports
+</surefireReportsDir>
+</configuration>
+
+```
+
+=== project
+
+The `project` parameter specifies the name of the maven project 
+Defaults to the value set below. 
+
+```
+<configuration>
+<project>
+${project}
+</project>
+</configuration>
+
+```
+
+=== log
+
+The `log` parameter specifies the log
+Defaults to the value set below. 
+
+```
+<configuration>
+<log>
+${log}
+</log>
 </configuration>
 
 ```

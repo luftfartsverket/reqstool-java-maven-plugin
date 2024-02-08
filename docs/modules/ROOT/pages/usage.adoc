@@ -6,9 +6,9 @@ To use the LFV Reqstool Java Maven Plugin, add the following configuration to yo
 <build>
     <plugins>
         <plugin>
-            <groupId>se.lfv.reqstool.plugins.maven</groupId>
+            <groupId>se.lfv.reqstool</groupId>
             <artifactId>reqstool-maven-plugin</artifactId>
-            <version>1.0.0</version>
+            <version>0.0.2</version>
             <executions>
                 <execution>
                     <goals>
@@ -18,9 +18,9 @@ To use the LFV Reqstool Java Maven Plugin, add the following configuration to yo
             </executions>
             <dependencies>
                 <dependency>
-                    <groupId>se.lfv.requirements.annotations</groupId>
+                    <groupId>se.lfv.reqstool</groupId>
                     <artifactId>reqstool-annotations-java</artifactId>
-                    <version>0.0.3-SNAPSHOT</version>
+                    <version>0.0.6</version>
                 </dependency>
             </dependencies>            
         </plugin>
