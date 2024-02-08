@@ -2,7 +2,7 @@
 
 site:
   title: Reqstool Java Maven Plugin
-  url: https://github.com/luftfartsverket/requirements-tool
+  url: https://github.com/luftfartsverket/reqstool-java-maven-plugin
   start_page: reqstool-java-maven-plugin::index.adoc
 
 content:
