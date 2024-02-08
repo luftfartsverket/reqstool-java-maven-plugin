@@ -6,7 +6,7 @@ on:
 jobs:
   linting:
     name: Check linting
-    uses: ./.github/workflows/linting.yml
+    uses: ./.github/workflows/lint.yml
   publish:
     needs: linting
     runs-on: ubuntu-latest
