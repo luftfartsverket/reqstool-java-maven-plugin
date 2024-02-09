@@ -1,0 +1,29 @@
+== Usage
+
+To use the LFV Reqstool Java Maven Plugin, add the following configuration to your Maven project's `pom.xml`:
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>se.lfv.reqstool</groupId>
+            <artifactId>reqstool-maven-plugin</artifactId>
+            <version>0.0.2</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>attach-reqstool-zip</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <dependencies>
+                <dependency>
+                    <groupId>se.lfv.reqstool</groupId>
+                    <artifactId>reqstool-annotations-java</artifactId>
+                    <version>0.0.6</version>
+                </dependency>
+            </dependencies>            
+        </plugin>
+    </plugins>
+</build>
+```
