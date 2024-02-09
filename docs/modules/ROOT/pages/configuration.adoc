@@ -7,11 +7,11 @@ To configure the plugin add a <configuration> block for the plugin under the <bu
 The `requirementsAnnotationsFile` parameter specifies the path to the requirements annotations file.
 Defaults to the value set below. 
 
-```
+```xml
 <configuration>
-<requirementsAnnotationsFile>
-${project.build.directory}/generated-sources/annotations/resources/annotations.yml
-</requirementsAnnotationsFile>
+  <requirementsAnnotationsFile>
+    ${project.build.directory}/generated-sources/annotations/resources/annotations.yml
+  </requirementsAnnotationsFile>
 </configuration>
 
 ```
@@ -21,11 +21,11 @@ ${project.build.directory}/generated-sources/annotations/resources/annotations.y
 The `svcsAnnotationsFile` parameter specifies the path to the svcs annotations file.
 Defaults to the value set below. 
 
-```
+```xml
 <configuration>
-<svcsAnnotationsFile>
-${project.build.directory}/generated-test-sources/test-annotations/resources/annotations
-</svcsAnnotationsFile>
+  <svcsAnnotationsFile>
+    ${project.build.directory}/generated-test-sources/test-annotations/resources/annotations
+  </svcsAnnotationsFile>
 </configuration>
 
 ```
@@ -35,11 +35,11 @@ ${project.build.directory}/generated-test-sources/test-annotations/resources/ann
 The `outputDirectory` parameter specifies the path to where to put the generated output
 Defaults to the value set below. 
 
-```
+```xml
 <configuration>
-<outputDirectory>
-${project.build.directory}/reqstool
-</outputDirectory>
+  <outputDirectory>
+    ${project.build.directory}/reqstool
+  </outputDirectory>
 </configuration>
 
 ```
@@ -49,11 +49,11 @@ ${project.build.directory}/reqstool
 The `datasetPath` parameter specifies the path to the dataset
 Defaults to the value set below. 
 
-```
+```xml
 <configuration>
-<datasetPath>
-${project.basedir}/reqstool
-</datasetPath>
+  <datasetPath>
+    ${project.basedir}/reqstool
+  </datasetPath>
 </configuration>
 
 ```
@@ -63,11 +63,11 @@ ${project.basedir}/reqstool
 The `failsafeReportsDir` parameter specifies the path to where the failsafe reports are found. 
 Defaults to the value set below. 
 
-```
+```xml
 <configuration>
-<failsafeReportsDir>
-${project.build.directory}/failsafe-reports
-</failsafeReportsDir>
+  <failsafeReportsDir>
+    ${project.build.directory}/failsafe-reports
+  </failsafeReportsDir>
 </configuration>
 
 ```
@@ -77,11 +77,11 @@ ${project.build.directory}/failsafe-reports
 The `surefireReportsDir` parameter specifies the path to where the surefire reports are found. 
 Defaults to the value set below. 
 
-```
+```xml
 <configuration>
-<surefireReportsDir>
-${project.build.directory}/surefire-reports
-</surefireReportsDir>
+  <surefireReportsDir>
+    ${project.build.directory}/surefire-reports
+  </surefireReportsDir>
 </configuration>
 
 ```
@@ -91,11 +91,11 @@ ${project.build.directory}/surefire-reports
 The `project` parameter specifies the name of the maven project 
 Defaults to the value set below. 
 
-```
+```xml
 <configuration>
-<project>
-${project}
-</project>
+  <project>
+    ${project}
+  </project>
 </configuration>
 
 ```
@@ -105,11 +105,11 @@ ${project}
 The `log` parameter specifies the log
 Defaults to the value set below. 
 
-```
+```xml
 <configuration>
-<log>
-${log}
-</log>
+  <log>
+    ${log}
+  </log>
 </configuration>
 
 ```

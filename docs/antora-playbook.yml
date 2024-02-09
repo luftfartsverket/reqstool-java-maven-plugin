@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/asciidoctor/asciidoctor-intellij-plugin/main/src/main/resources/jsonSchemas/antoraPlaybookSchema.json
 
 site:
-  title: Reqstool Java Maven Plugin
+  title: Reqstool Maven Plugin
   url: https://github.com/luftfartsverket/reqstool-java-maven-plugin
   start_page: reqstool-java-maven-plugin::index.adoc
 
