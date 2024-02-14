@@ -3,8 +3,8 @@
 
 image:https://img.shields.io/github/commit-activity/m/Luftfartsverket/reqstool-java-maven-plugin?label=commits&style=for-the-badge["Commit Activity", link="https://github.com/Luftfartsverket/reqstool-java-maven-plugin/pulse"]
 image:https://img.shields.io/github/issues/Luftfartsverket/reqstool-java-maven-plugin?style=for-the-badge&logo=github["GitHub Issues", link="https://github.com/Luftfartsverket/reqstool-java-maven-plugin/issues"]
-image:https://img.shields.io/github/license/Luftfartsverket/reqstool-java-maven-plugin?style=for-the-badge&logo=MIT["License", link="https://opensource.org/license/mit/"]
-image:https://img.shields.io/github/actions/workflow/status/Luftfartsverket/reqstool-java-maven-plugin/build.yml?style=for-the-badge&logo=Build["Build", link="https://github.com/Luftfartsverket/reqstool-java-maven-plugin/actions/workflows/build.yml"]
+image:https://img.shields.io/github/license/Luftfartsverket/reqstool-java-maven-plugin?style=for-the-badge&logo=opensourceinitiative["License", link="https://opensource.org/license/mit/"]
+image:https://img.shields.io/github/actions/workflow/status/Luftfartsverket/reqstool-java-maven-plugin/build.yml?style=for-the-badge&logo=github["Build", link="https://github.com/Luftfartsverket/reqstool-java-maven-plugin/actions/workflows/build.yml"]
 
 
 include::docs/modules/ROOT/pages/index.adoc[]
