@@ -1,4 +1,7 @@
 
 image:https://img.shields.io/github/commit-activity/m/Luftfartsverket/reqstool-java-maven-plugin?label=commits&style=for-the-badge["Commit Activity", link="https://github.com/Luftfartsverket/reqstool-java-maven-plugin/pulse"]
+image:https://img.shields.io/github/issues/Luftfartsverket/reqstool-java-maven-plugin?style=for-the-badge&logo=github["GitHub Issues", link="https://github.com/Luftfartsverket/reqstool-java-maven-plugin/issues"]
+image:https://img.shields.io/github/pulls/Luftfartsverket/reqstool-java-maven-plugin?style=for-the-badge&logo=github["GitHub Pull requests", link="https://github.com/Luftfartsverket/reqstool-java-maven-plugin/pulls"]
+image:https://img.shields.io/github/license/Luftfartsverket/reqstool-java-maven-plugin?style=for-the-badge&logo=MIT["License", link="https://opensource.org/license/mit/"]
 
 include::docs/modules/ROOT/pages/index.adoc[]
