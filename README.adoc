@@ -1,1 +1,4 @@
+
+image:https://img.shields.io/github/commit-activity/m/TimefoldAI/timefold-solver?label=commits&style=for-the-badge["Commit Activity", link="https://github.com/Luftfartsverket/reqstool-java-maven-plugin/pulse"]
+
 include::docs/modules/ROOT/pages/index.adoc[]
