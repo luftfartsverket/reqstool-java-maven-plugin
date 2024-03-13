@@ -80,7 +80,6 @@ class RequirementsToolMojoTests {
 
 		zipMethod.invoke(mojo);
 
-		
 		Path zipfileTargetPath = Paths.get("target", "test-classes", "zip");
 		Path expectedZipFilePath = zipfileTargetPath.resolve(zipFileNameString);
 
