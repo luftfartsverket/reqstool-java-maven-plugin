@@ -11,16 +11,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -28,28 +31,28 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
-@Mojo(name = "attach-reqstool-zip", defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "assemble-and-attach-zip-artifact", defaultPhase = LifecyclePhase.PACKAGE)
 public class RequirementsToolMojo extends AbstractMojo {
 
-	public static final String TEST_RESULTS_SUREFIRE = "test_results/surefire";
+	// Constants
 
-	public static final String MANUAL_VERIFICATION_RESULTS_YML = "manual_verification_results.yml";
+	public static final String INPUT_DIR_TEST_RESULTS_FAILSAFE = "test_results/failsafe";
 
-	public static final String SOFTWARE_VERIFICATION_CASES_YML = "software_verification_cases.yml";
+	public static final String INPUT_DIR_TEST_RESULTS_SUREFIRE = "test_results/surefire";
 
-	public static final String REQUIREMENTS_YML = "requirements.yml";
+	public static final String INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML = "manual_verification_results.yml";
 
-	public static final String ANNOTATIONS_YML = "annotations.yml";
+	public static final String INPUT_FILE_REQUIREMENTS_YML = "requirements.yml";
 
-	public static final String TESTS = "tests";
+	public static final String INPUT_FILESOFTWARE_VERIFICATION_CASES_YML = "software_verification_cases.yml";
 
-	public static final String IMPLEMENTATIONS = "implementations";
+	public static final String OUTPUT_FILE_ANNOTATIONS_YML_FILE = "annotations.yml";
 
-	public static final String REQUIREMENT_ANNOTATIONS = "requirement_annotations";
+	public static final String XML_IMPLEMENTATIONS = "implementations";
 
-	public static final String TEST_RESULTS_FAILSAFE = "test_results/failsafe";
+	public static final String XML_REQUIREMENT_ANNOTATIONS = "requirement_annotations";
 
-	public static final String REQSTOOL_DIRECTORY = "";
+	public static final String XML_TESTS = "tests";
 
 	protected static final String YAML_LANG_SERVER_SCHEMA_INFO = "# yaml-language-server: $schema=https://raw.githubusercontent.com/Luftfartsverket/reqstool-client/main/src/reqstool/resources/schemas/v1/annotations.schema.json";
 
@@ -80,34 +83,48 @@ public class RequirementsToolMojo extends AbstractMojo {
 	@Parameter(property = "surefireReportsDir", defaultValue = "${project.build.directory}/surefire-reports")
 	private File surefireReportsDir;
 
+	@Parameter(property = "zipArtifactFilename", defaultValue = "${project.build.finalName}-reqstool.zip")
+	private String zipArtifactFilename;
+
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
-	MavenProject project;
+	private MavenProject project;
 
-	@Component
+	@Inject
 	private MavenProjectHelper projectHelper;
-
-	private String zipFilename;
 
 	@Parameter(defaultValue = "${log}", readonly = true)
 	private Log log;
 
+	@Parameter(property = "reqstool.skip", defaultValue = "false")
+	private boolean skip;
+
+	@Parameter(property = "reqstool.skipAssembleZipArtifact", defaultValue = "false")
+	private boolean skipAssembleZipArtifact;
+
+	@Parameter(property = "reqstool.skipAttachZipArtifact", defaultValue = "false")
+	private boolean skipAttachZipArtifact;
+
 	public void execute() throws MojoExecutionException {
-		getLog().debug("Creating Reqstool Maven zip artifact");
+		if (skip) {
+			getLog().info("Skipping execution of reqstool plugin");
+			return;
+		}
 
-		zipFilename = project.getBuild().getFinalName() + "-reqstool" + ".zip";
-
-		JsonNode implementationsNode = yamlMapper.createObjectNode();
-		JsonNode testsNode = yamlMapper.createObjectNode();
+		getLog().debug("Assembling and Attaching Reqstool Maven Zip Artifact");
 
 		try {
+
+			JsonNode implementationsNode = yamlMapper.createObjectNode();
+			JsonNode testsNode = yamlMapper.createObjectNode();
+
 			if (requirementsAnnotationsFile.exists()) {
 				implementationsNode = yamlMapper.readTree(requirementsAnnotationsFile)
-					.path(REQUIREMENT_ANNOTATIONS)
-					.path(IMPLEMENTATIONS);
+					.path(XML_REQUIREMENT_ANNOTATIONS)
+					.path(XML_IMPLEMENTATIONS);
 			}
 
 			if (svcsAnnotationsFile.exists()) {
-				testsNode = yamlMapper.readTree(svcsAnnotationsFile).path(REQUIREMENT_ANNOTATIONS).path(TESTS);
+				testsNode = yamlMapper.readTree(svcsAnnotationsFile).path(XML_REQUIREMENT_ANNOTATIONS).path(XML_TESTS);
 			}
 
 			JsonNode combinedOutputNode = combineOutput(implementationsNode, testsNode);
@@ -116,10 +133,21 @@ public class RequirementsToolMojo extends AbstractMojo {
 				outputDirectory.mkdirs();
 			}
 
-			writeCombinedOutputToFile(new File(outputDirectory, ANNOTATIONS_YML), combinedOutputNode);
+			writeCombinedOutputToFile(new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE), combinedOutputNode);
 
-			createZipFile();
-			attachArtifact();
+			if (!skipAssembleZipArtifact) {
+				assembleZipArtifact();
+			}
+			else {
+				getLog().info("Skipping zip artifact assembly");
+			}
+
+			if (!skipAttachZipArtifact) {
+				attachArtifact();
+			}
+			else {
+				getLog().info("Skipping zip artifact attachment");
+			}
 
 		}
 		catch (IOException e) {
@@ -128,69 +156,68 @@ public class RequirementsToolMojo extends AbstractMojo {
 	}
 
 	static JsonNode combineOutput(JsonNode implementationsNode, JsonNode testsNode) {
-
-		// Create an ObjectNode for "requirement_annotations"
 		ObjectNode requirementAnnotationsNode = yamlMapper.createObjectNode();
 		if (!implementationsNode.isEmpty()) {
-			requirementAnnotationsNode.set(IMPLEMENTATIONS, implementationsNode);
+			requirementAnnotationsNode.set(XML_IMPLEMENTATIONS, implementationsNode);
 		}
 		if (!testsNode.isEmpty()) {
-			requirementAnnotationsNode.set(TESTS, testsNode);
+			requirementAnnotationsNode.set(XML_TESTS, testsNode);
 		}
 
 		ObjectNode newNode = yamlMapper.createObjectNode();
-		newNode.set(REQUIREMENT_ANNOTATIONS, requirementAnnotationsNode);
+		newNode.set(XML_REQUIREMENT_ANNOTATIONS, requirementAnnotationsNode);
 
 		return newNode;
 	}
 
-	static void writeCombinedOutputToFile(File outputFile, JsonNode combinedOutputNode) throws IOException {
+	private void writeCombinedOutputToFile(File outputFile, JsonNode combinedOutputNode) throws IOException {
+		getLog().info("Combining " + requirementsAnnotationsFile + " and " + svcsAnnotationsFile + " into "
+				+ outputFile.getAbsolutePath());
 
 		try (Writer writer = new PrintWriter(
 				new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
-
-			// Write the YAML language server schema info as a comment
 			writer.write(YAML_LANG_SERVER_SCHEMA_INFO + System.lineSeparator());
-
-			// Write the JSON node data
 			yamlMapper.writeValue(writer, combinedOutputNode);
 		}
 	}
 
-	private void createZipFile() throws IOException {
-		File zipFile = new File(outputDirectory, zipFilename);
-		getLog().info("Creating zip file: " + zipFile.getAbsolutePath());
+	private void assembleZipArtifact() throws IOException {
+		File zipFile = new File(outputDirectory, zipArtifactFilename);
+		getLog().info("Assembling zip file: " + zipFile.getAbsolutePath());
 
 		try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zipOut = new ZipOutputStream(fos)) {
 
-			addFileToZip(zipOut, new File(datasetPath, REQUIREMENTS_YML), null);
-			addFileToZip(zipOut, new File(datasetPath, SOFTWARE_VERIFICATION_CASES_YML), null);
-			addFileToZip(zipOut, new File(datasetPath, MANUAL_VERIFICATION_RESULTS_YML), null);
-			addFileToZip(zipOut, new File(outputDirectory, ANNOTATIONS_YML), null);
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML), null);
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILESOFTWARE_VERIFICATION_CASES_YML), null);
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML), null);
+			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE), null);
 
-			addXmlFilesToZip(zipOut, failsafeReportsDir, new File(TEST_RESULTS_FAILSAFE));
-			addXmlFilesToZip(zipOut, surefireReportsDir, new File(TEST_RESULTS_SUREFIRE));
+			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir, new File(INPUT_DIR_TEST_RESULTS_FAILSAFE));
+			addXmlFilesToZipArtifact(zipOut, surefireReportsDir, new File(INPUT_DIR_TEST_RESULTS_SUREFIRE));
 		}
+
+		getLog().info("Assembled zip artifact: " + zipFile.getAbsolutePath());
+
 	}
 
-	private void addXmlFilesToZip(ZipOutputStream zipOut, File directory, File targetDirectory) throws IOException {
+	private void addXmlFilesToZipArtifact(ZipOutputStream zipOut, File directory, File targetDirectory)
+			throws IOException {
 		File[] files = directory.listFiles();
 		if (files != null) {
 			for (File file : files) {
 				if (file.isDirectory()) {
-					addXmlFilesToZip(zipOut, file, new File(targetDirectory, file.toString()));
+					addXmlFilesToZipArtifact(zipOut, file, new File(targetDirectory, file.toString()));
 				}
 				else if (file.isFile() && file.getName().toLowerCase(Locale.US).endsWith(".xml")) {
-					addFileToZip(zipOut, file, targetDirectory);
+					addFileToZipArtifact(zipOut, file, targetDirectory);
 				}
 			}
 		}
 	}
 
-	private void addFileToZip(ZipOutputStream zipOut, File file, File targetDirectory) throws IOException {
+	private void addFileToZipArtifact(ZipOutputStream zipOut, File file, File targetDirectory) throws IOException {
 		if (file.exists()) {
 			File entryName;
-
 			if (targetDirectory == null || targetDirectory.getName().isEmpty()) {
 				entryName = new File(file.getName());
 			}
@@ -210,10 +237,8 @@ public class RequirementsToolMojo extends AbstractMojo {
 	}
 
 	private void attachArtifact() {
-		File zipFile = new File(outputDirectory, zipFilename);
-
+		File zipFile = new File(outputDirectory, zipArtifactFilename);
 		getLog().info("Attaching artifact: " + zipFile.getName());
-
 		projectHelper.attachArtifact(project, "zip", "reqstool", zipFile);
 	}
 
