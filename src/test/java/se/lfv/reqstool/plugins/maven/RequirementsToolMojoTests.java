@@ -27,12 +27,12 @@ class RequirementsToolMojoTests {
 		File testsAnnotationsFile = new File(classLoader.getResource("yml/svcs_annotations.yml").getFile());
 
 		JsonNode implementationsNode = RequirementsToolMojo.yamlMapper.readTree(implementationsAnnotationsFile)
-			.path(RequirementsToolMojo.REQUIREMENT_ANNOTATIONS)
-			.path(RequirementsToolMojo.IMPLEMENTATIONS);
+			.path(RequirementsToolMojo.XML_REQUIREMENT_ANNOTATIONS)
+			.path(RequirementsToolMojo.XML_IMPLEMENTATIONS);
 
 		JsonNode testsNode = RequirementsToolMojo.yamlMapper.readTree(testsAnnotationsFile)
-			.path(RequirementsToolMojo.REQUIREMENT_ANNOTATIONS)
-			.path(RequirementsToolMojo.TESTS);
+			.path(RequirementsToolMojo.XML_REQUIREMENT_ANNOTATIONS)
+			.path(RequirementsToolMojo.XML_TESTS);
 
 		JsonNode combinedNode = RequirementsToolMojo.combineOutput(implementationsNode, testsNode);
 
@@ -47,43 +47,39 @@ class RequirementsToolMojoTests {
 	}
 
 	@Test
-	void testCreateZip() throws Exception {
+	void testAssembleZipArtifact() throws Exception {
 
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL resourcePath = classLoader.getResource("zip");
 		Path zipResourcePath = Paths.get(resourcePath.getFile());
-		File file = zipResourcePath.toFile();
-		String zipFileNameString = "reqstool-test-zip";
+		String zipArtifactFilename = "reqstool-test-zip";
 
 		RequirementsToolMojo mojo = new RequirementsToolMojo();
 
-		Field outputDirectory = RequirementsToolMojo.class.getDeclaredField("outputDirectory");
-		Field datasetPath = RequirementsToolMojo.class.getDeclaredField("datasetPath");
-		Field zipFileName = RequirementsToolMojo.class.getDeclaredField("zipFilename");
-		Field failsafeReportsDir = RequirementsToolMojo.class.getDeclaredField("failsafeReportsDir");
-		Field surefireReportsDir = RequirementsToolMojo.class.getDeclaredField("surefireReportsDir");
+		Field outputDirectoryField = RequirementsToolMojo.class.getDeclaredField("outputDirectory");
+		Field datasetPathField = RequirementsToolMojo.class.getDeclaredField("datasetPath");
+		Field zipArtifactFilenameField = RequirementsToolMojo.class.getDeclaredField("zipArtifactFilename");
+		Field failsafeReportsDirField = RequirementsToolMojo.class.getDeclaredField("failsafeReportsDir");
+		Field surefireReportsDirField = RequirementsToolMojo.class.getDeclaredField("surefireReportsDir");
 
-		outputDirectory.setAccessible(true);
-		datasetPath.setAccessible(true);
-		zipFileName.setAccessible(true);
-		failsafeReportsDir.setAccessible(true);
-		surefireReportsDir.setAccessible(true);
+		outputDirectoryField.setAccessible(true);
+		datasetPathField.setAccessible(true);
+		zipArtifactFilenameField.setAccessible(true);
+		failsafeReportsDirField.setAccessible(true);
+		surefireReportsDirField.setAccessible(true);
 
-		outputDirectory.set(mojo, file);
-		datasetPath.set(mojo, file);
-		zipFileName.set(mojo, zipFileNameString);
-		failsafeReportsDir.set(mojo, file);
-		surefireReportsDir.set(mojo, file);
+		outputDirectoryField.set(mojo, zipResourcePath.toFile());
+		datasetPathField.set(mojo, zipResourcePath.toFile());
+		failsafeReportsDirField.set(mojo, zipResourcePath.toFile());
+		surefireReportsDirField.set(mojo, zipResourcePath.toFile());
+		zipArtifactFilenameField.set(mojo, zipArtifactFilename);
 
-		Method zipMethod = RequirementsToolMojo.class.getDeclaredMethod("createZipFile");
-		zipMethod.setAccessible(true);
+		Method assembleZipArtifactMethod = RequirementsToolMojo.class.getDeclaredMethod("assembleZipArtifact");
+		assembleZipArtifactMethod.setAccessible(true);
 
-		zipMethod.invoke(mojo);
+		assembleZipArtifactMethod.invoke(mojo);
 
-		Path zipfileTargetPath = Paths.get("target", "test-classes", "zip");
-		Path expectedZipFilePath = zipfileTargetPath.resolve(zipFileNameString);
-
-		assertTrue(Files.exists(expectedZipFilePath));
+		assertTrue(Files.exists(zipResourcePath.resolve(zipArtifactFilename)));
 
 	}
 
