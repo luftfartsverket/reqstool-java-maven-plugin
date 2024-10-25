@@ -197,6 +197,10 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir, new File(INPUT_DIR_TEST_RESULTS_FAILSAFE));
 			addXmlFilesToZipArtifact(zipOut, surefireReportsDir, new File(INPUT_DIR_TEST_RESULTS_SUREFIRE));
+			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir,
+					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_FAILSAFE));
+			addXmlFilesToZipArtifact(zipOut, surefireReportsDir,
+					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_SUREFIRE));
 		}
 
 		getLog().info("Assembled zip artifact: " + zipFile.getAbsolutePath());
