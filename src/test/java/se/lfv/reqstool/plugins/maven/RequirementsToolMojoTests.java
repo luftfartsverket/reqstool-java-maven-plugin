@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 
+import org.apache.maven.model.Build;
+import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -52,19 +54,27 @@ class RequirementsToolMojoTests {
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL resourcePath = classLoader.getResource("zip");
 		Path zipResourcePath = Paths.get(resourcePath.getFile());
-		String zipArtifactFilename = "reqstool-test-zip";
 
 		RequirementsToolMojo mojo = new RequirementsToolMojo();
 
+		// Create and set a mock MavenProject
+		MavenProject mockProject = new MavenProject();
+		Build build = new Build();
+		build.setFinalName("test-project");
+
+		mockProject.setBuild(build);
+
+		Field projectField = RequirementsToolMojo.class.getDeclaredField("project");
+		projectField.setAccessible(true);
+		projectField.set(mojo, mockProject);
+
 		Field outputDirectoryField = RequirementsToolMojo.class.getDeclaredField("outputDirectory");
 		Field datasetPathField = RequirementsToolMojo.class.getDeclaredField("datasetPath");
-		Field zipArtifactFilenameField = RequirementsToolMojo.class.getDeclaredField("zipArtifactFilename");
 		Field failsafeReportsDirField = RequirementsToolMojo.class.getDeclaredField("failsafeReportsDir");
 		Field surefireReportsDirField = RequirementsToolMojo.class.getDeclaredField("surefireReportsDir");
 
 		outputDirectoryField.setAccessible(true);
 		datasetPathField.setAccessible(true);
-		zipArtifactFilenameField.setAccessible(true);
 		failsafeReportsDirField.setAccessible(true);
 		surefireReportsDirField.setAccessible(true);
 
@@ -72,14 +82,13 @@ class RequirementsToolMojoTests {
 		datasetPathField.set(mojo, zipResourcePath.toFile());
 		failsafeReportsDirField.set(mojo, zipResourcePath.toFile());
 		surefireReportsDirField.set(mojo, zipResourcePath.toFile());
-		zipArtifactFilenameField.set(mojo, zipArtifactFilename);
 
 		Method assembleZipArtifactMethod = RequirementsToolMojo.class.getDeclaredMethod("assembleZipArtifact");
 		assembleZipArtifactMethod.setAccessible(true);
 
 		assembleZipArtifactMethod.invoke(mojo);
 
-		assertTrue(Files.exists(zipResourcePath.resolve(zipArtifactFilename)));
+		assertTrue(Files.exists(zipResourcePath.resolve("test-project-reqstool.zip")));
 
 	}
 

@@ -83,9 +83,6 @@ public class RequirementsToolMojo extends AbstractMojo {
 	@Parameter(property = "surefireReportsDir", defaultValue = "${project.build.directory}/surefire-reports")
 	private File surefireReportsDir;
 
-	@Parameter(property = "zipArtifactFilename", defaultValue = "${project.build.finalName}-reqstool.zip")
-	private String zipArtifactFilename;
-
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
 
@@ -182,18 +179,26 @@ public class RequirementsToolMojo extends AbstractMojo {
 	}
 
 	private void assembleZipArtifact() throws IOException {
+		String zipArtifactFilename = project.getBuild().getFinalName() + "-reqstool.zip";
+		String topLevelDir = project.getBuild().getFinalName() + "-reqstool";
+
 		File zipFile = new File(outputDirectory, zipArtifactFilename);
 		getLog().info("Assembling zip file: " + zipFile.getAbsolutePath());
 
 		try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zipOut = new ZipOutputStream(fos)) {
 
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML), null);
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILESOFTWARE_VERIFICATION_CASES_YML), null);
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML), null);
-			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE), null);
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML), new File(topLevelDir));
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILESOFTWARE_VERIFICATION_CASES_YML),
+					new File(topLevelDir));
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML),
+					new File(topLevelDir));
+			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE),
+					new File(topLevelDir));
 
-			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir, new File(INPUT_DIR_TEST_RESULTS_FAILSAFE));
-			addXmlFilesToZipArtifact(zipOut, surefireReportsDir, new File(INPUT_DIR_TEST_RESULTS_SUREFIRE));
+			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir,
+					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_FAILSAFE));
+			addXmlFilesToZipArtifact(zipOut, surefireReportsDir,
+					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_SUREFIRE));
 		}
 
 		getLog().info("Assembled zip artifact: " + zipFile.getAbsolutePath());
@@ -237,6 +242,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 	}
 
 	private void attachArtifact() {
+		String zipArtifactFilename = project.getBuild().getFinalName() + "-reqstool.zip";
 		File zipFile = new File(outputDirectory, zipArtifactFilename);
 		getLog().info("Attaching artifact: " + zipFile.getName());
 		projectHelper.attachArtifact(project, "zip", "reqstool", zipFile);
