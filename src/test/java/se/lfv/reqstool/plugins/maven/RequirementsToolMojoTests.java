@@ -77,7 +77,6 @@ class RequirementsToolMojoTests {
 		surefireReportsDirField.set(mojo, zipResourcePath.toFile());
 		zipArtifactFilenameField.set(mojo, zipArtifactFilename);
 		projectReqstoolDirField.set(mojo, projectReqstoolDir);
-		// Or whatever test value you want to use
 
 		Method assembleZipArtifactMethod = RequirementsToolMojo.class.getDeclaredMethod("assembleZipArtifact");
 		assembleZipArtifactMethod.setAccessible(true);
