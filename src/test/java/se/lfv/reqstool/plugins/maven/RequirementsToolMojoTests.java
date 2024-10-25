@@ -53,6 +53,7 @@ class RequirementsToolMojoTests {
 		URL resourcePath = classLoader.getResource("zip");
 		Path zipResourcePath = Paths.get(resourcePath.getFile());
 		String zipArtifactFilename = "reqstool-test-zip";
+		String projectReqstoolDir = "test-project-reqstool";
 
 		RequirementsToolMojo mojo = new RequirementsToolMojo();
 
@@ -61,18 +62,22 @@ class RequirementsToolMojoTests {
 		Field zipArtifactFilenameField = RequirementsToolMojo.class.getDeclaredField("zipArtifactFilename");
 		Field failsafeReportsDirField = RequirementsToolMojo.class.getDeclaredField("failsafeReportsDir");
 		Field surefireReportsDirField = RequirementsToolMojo.class.getDeclaredField("surefireReportsDir");
+		Field projectReqstoolDirField = RequirementsToolMojo.class.getDeclaredField("projectReqstoolDir");
 
 		outputDirectoryField.setAccessible(true);
 		datasetPathField.setAccessible(true);
 		zipArtifactFilenameField.setAccessible(true);
 		failsafeReportsDirField.setAccessible(true);
 		surefireReportsDirField.setAccessible(true);
+		projectReqstoolDirField.setAccessible(true);
 
 		outputDirectoryField.set(mojo, zipResourcePath.toFile());
 		datasetPathField.set(mojo, zipResourcePath.toFile());
 		failsafeReportsDirField.set(mojo, zipResourcePath.toFile());
 		surefireReportsDirField.set(mojo, zipResourcePath.toFile());
 		zipArtifactFilenameField.set(mojo, zipArtifactFilename);
+		projectReqstoolDirField.set(mojo, projectReqstoolDir);
+		// Or whatever test value you want to use
 
 		Method assembleZipArtifactMethod = RequirementsToolMojo.class.getDeclaredMethod("assembleZipArtifact");
 		assembleZipArtifactMethod.setAccessible(true);
