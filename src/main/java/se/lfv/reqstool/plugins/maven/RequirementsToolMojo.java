@@ -83,6 +83,9 @@ public class RequirementsToolMojo extends AbstractMojo {
 	@Parameter(property = "surefireReportsDir", defaultValue = "${project.build.directory}/surefire-reports")
 	private File surefireReportsDir;
 
+	@Parameter(property = "projectReqstoolDir", defaultValue = "${project.build.finalName}-reqstool")
+	private String projectReqstoolDir;
+
 	@Parameter(property = "zipArtifactFilename", defaultValue = "${project.build.finalName}-reqstool.zip")
 	private String zipArtifactFilename;
 
@@ -187,10 +190,14 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 		try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zipOut = new ZipOutputStream(fos)) {
 
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML), null);
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILESOFTWARE_VERIFICATION_CASES_YML), null);
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML), null);
-			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE), null);
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML),
+					new File(projectReqstoolDir));
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILESOFTWARE_VERIFICATION_CASES_YML),
+					new File(projectReqstoolDir));
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML),
+					new File(projectReqstoolDir));
+			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE),
+					new File(projectReqstoolDir));
 
 			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir, new File(INPUT_DIR_TEST_RESULTS_FAILSAFE));
 			addXmlFilesToZipArtifact(zipOut, surefireReportsDir, new File(INPUT_DIR_TEST_RESULTS_SUREFIRE));
