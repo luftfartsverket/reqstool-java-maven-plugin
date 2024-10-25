@@ -195,8 +195,6 @@ public class RequirementsToolMojo extends AbstractMojo {
 			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE),
 					new File(topLevelDir));
 
-			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir, new File(INPUT_DIR_TEST_RESULTS_FAILSAFE));
-			addXmlFilesToZipArtifact(zipOut, surefireReportsDir, new File(INPUT_DIR_TEST_RESULTS_SUREFIRE));
 			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir,
 					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_FAILSAFE));
 			addXmlFilesToZipArtifact(zipOut, surefireReportsDir,
