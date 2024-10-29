@@ -63,24 +63,24 @@ public class RequirementsToolMojo extends AbstractMojo {
 		yamlMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
 	}
 
-	@Parameter(property = "requirementsAnnotationsFile",
+	@Parameter(property = "reqstool.requirementsAnnotationsFile",
 			defaultValue = "${project.build.directory}/generated-sources/annotations/resources/annotations.yml")
 	private File requirementsAnnotationsFile;
 
-	@Parameter(property = "svcsAnnotationsFile",
+	@Parameter(property = "reqstool.svcsAnnotationsFile",
 			defaultValue = "${project.build.directory}/generated-test-sources/test-annotations/resources/annotations.yml")
 	private File svcsAnnotationsFile;
 
-	@Parameter(property = "outputDirectory", defaultValue = "${project.build.directory}/reqstool")
+	@Parameter(property = "reqstool.outputDirectory", defaultValue = "${project.build.directory}/reqstool")
 	private File outputDirectory;
 
-	@Parameter(property = "datasetPath", defaultValue = "${project.basedir}/reqstool")
+	@Parameter(property = "reqstool.datasetPath", defaultValue = "${project.basedir}/reqstool")
 	private File datasetPath;
 
-	@Parameter(property = "failsafeReportsDir", defaultValue = "${project.build.directory}/failsafe-reports")
+	@Parameter(property = "reqstool.failsafeReportsDir", defaultValue = "${project.build.directory}/failsafe-reports")
 	private File failsafeReportsDir;
 
-	@Parameter(property = "surefireReportsDir", defaultValue = "${project.build.directory}/surefire-reports")
+	@Parameter(property = "reqstool.surefireReportsDir", defaultValue = "${project.build.directory}/surefire-reports")
 	private File surefireReportsDir;
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
