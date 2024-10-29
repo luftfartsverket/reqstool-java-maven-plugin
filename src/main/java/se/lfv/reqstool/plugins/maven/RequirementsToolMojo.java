@@ -214,7 +214,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE),
 					new File(topLevelDir));
 
-			addReqtoolConfigYamlToZip(zipOut, new File(topLevelDir));
+			addReqstoolConfigYamlToZip(zipOut, new File(topLevelDir));
 
 			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir,
 					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_FAILSAFE));
@@ -269,7 +269,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 		projectHelper.attachArtifact(project, "zip", "reqstool", zipFile);
 	}
 
-	private void addReqtoolConfigYamlToZip(ZipOutputStream zipOut, File topLevelDir) throws IOException {
+	private void addReqstoolConfigYamlToZip(ZipOutputStream zipOut, File topLevelDir) throws IOException {
 		DumperOptions options = new DumperOptions();
 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		options.setPrettyFlow(true);
