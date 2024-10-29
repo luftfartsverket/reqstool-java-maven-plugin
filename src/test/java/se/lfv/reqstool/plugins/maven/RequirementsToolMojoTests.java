@@ -50,7 +50,6 @@ class RequirementsToolMojoTests {
 
 	@Test
 	void testAssembleZipArtifact() throws Exception {
-
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL resourcePath = classLoader.getResource("zip");
 		Path zipResourcePath = Paths.get(resourcePath.getFile());
@@ -61,35 +60,44 @@ class RequirementsToolMojoTests {
 		MavenProject mockProject = new MavenProject();
 		Build build = new Build();
 		build.setFinalName("test-project");
-
 		mockProject.setBuild(build);
 
-		Field projectField = RequirementsToolMojo.class.getDeclaredField("project");
-		projectField.setAccessible(true);
-		projectField.set(mojo, mockProject);
+		// Set all required fields
+		setFieldValue(mojo, "project", mockProject);
+		setFieldValue(mojo, "outputDirectory", zipResourcePath.toFile());
+		setFieldValue(mojo, "datasetPath", zipResourcePath.toFile());
+		setFieldValue(mojo, "failsafeReportsDir", zipResourcePath.toFile());
+		setFieldValue(mojo, "surefireReportsDir", zipResourcePath.toFile());
+		setFieldValue(mojo, "requirementsAnnotationsFile", createTestFile(zipResourcePath, "requirements.yml"));
+		setFieldValue(mojo, "svcsAnnotationsFile", createTestFile(zipResourcePath, "software_verification_cases.yml"));
+		setFieldValue(mojo, "mvrsAnnotationsFile", createTestFile(zipResourcePath, "manual_verification_results.yml"));
+		setFieldValue(mojo, "annotationsFile", createTestFile(zipResourcePath, "annotations.yml"));
 
-		Field outputDirectoryField = RequirementsToolMojo.class.getDeclaredField("outputDirectory");
-		Field datasetPathField = RequirementsToolMojo.class.getDeclaredField("datasetPath");
-		Field failsafeReportsDirField = RequirementsToolMojo.class.getDeclaredField("failsafeReportsDir");
-		Field surefireReportsDirField = RequirementsToolMojo.class.getDeclaredField("surefireReportsDir");
-
-		outputDirectoryField.setAccessible(true);
-		datasetPathField.setAccessible(true);
-		failsafeReportsDirField.setAccessible(true);
-		surefireReportsDirField.setAccessible(true);
-
-		outputDirectoryField.set(mojo, zipResourcePath.toFile());
-		datasetPathField.set(mojo, zipResourcePath.toFile());
-		failsafeReportsDirField.set(mojo, zipResourcePath.toFile());
-		surefireReportsDirField.set(mojo, zipResourcePath.toFile());
-
+		// Invoke the method
 		Method assembleZipArtifactMethod = RequirementsToolMojo.class.getDeclaredMethod("assembleZipArtifact");
 		assembleZipArtifactMethod.setAccessible(true);
-
 		assembleZipArtifactMethod.invoke(mojo);
 
 		assertTrue(Files.exists(zipResourcePath.resolve("test-project-reqstool.zip")));
+	}
 
+	// Helper method to set field values
+	private void setFieldValue(Object object, String fieldName, Object value) throws Exception {
+		Field field = RequirementsToolMojo.class.getDeclaredField(fieldName);
+		field.setAccessible(true);
+		field.set(object, value);
+	}
+
+	// Helper method to create test files
+	private File createTestFile(Path directory, String filename) throws IOException {
+		File file = new File(directory.toFile(), filename);
+		if (!file.exists()) {
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+			// Optionally write some content to the file
+			Files.write(file.toPath(), "test content".getBytes());
+		}
+		return file;
 	}
 
 }

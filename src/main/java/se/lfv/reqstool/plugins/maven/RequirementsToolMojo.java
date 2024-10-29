@@ -8,6 +8,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -23,6 +26,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,7 +49,11 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 	public static final String INPUT_FILE_REQUIREMENTS_YML = "requirements.yml";
 
-	public static final String INPUT_FILESOFTWARE_VERIFICATION_CASES_YML = "software_verification_cases.yml";
+	public static final String INPUT_FILE_SOFTWARE_VERIFICATION_CASES_YML = "software_verification_cases.yml";
+
+	public static final String INPUT_PATH_DATASET = "reqstool";
+
+	public static final String OUTPUT_FILE_REQSTOOL_CONFIG_YML = "reqstool_config.yml";
 
 	public static final String OUTPUT_FILE_ANNOTATIONS_YML_FILE = "annotations.yml";
 
@@ -54,7 +63,9 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 	public static final String XML_TESTS = "tests";
 
-	protected static final String YAML_LANG_SERVER_SCHEMA_INFO = "# yaml-language-server: $schema=https://raw.githubusercontent.com/Luftfartsverket/reqstool-client/main/src/reqstool/resources/schemas/v1/annotations.schema.json";
+	protected static final String YAML_LANG_SERVER_SCHEMA_ANNOTATIONS = "# yaml-language-server: $schema=https://raw.githubusercontent.com/Luftfartsverket/reqstool-client/main/src/reqstool/resources/schemas/v1/annotations.schema.json";
+
+	protected static final String YAML_LANG_SERVER_SCHEMA_CONFIG = "# yaml-language-server: $schema=https://raw.githubusercontent.com/Luftfartsverket/reqstool-client/main/src/reqstool/resources/schemas/v1/reqstool_config.schema.json";
 
 	protected static final ObjectMapper yamlMapper;
 
@@ -71,10 +82,18 @@ public class RequirementsToolMojo extends AbstractMojo {
 			defaultValue = "${project.build.directory}/generated-test-sources/test-annotations/resources/annotations.yml")
 	private File svcsAnnotationsFile;
 
+	@Parameter(property = "reqstool.mvrsAnnotationsFile",
+			defaultValue = "${project.basedir}/docs/reqstool/manual_verification_results.yml")
+	private File mvrsAnnotationsFile;
+
 	@Parameter(property = "reqstool.outputDirectory", defaultValue = "${project.build.directory}/reqstool")
 	private File outputDirectory;
 
-	@Parameter(property = "reqstool.datasetPath", defaultValue = "${project.basedir}/reqstool")
+	@Parameter(property = "reqstool.annotationsFile",
+			defaultValue = "${project.build.directory}/reqstool/annotations.yml")
+	private File annotationsFile;
+
+	@Parameter(property = "reqstool.datasetPath", defaultValue = "${project.basedir}/docs/reqstool")
 	private File datasetPath;
 
 	@Parameter(property = "reqstool.failsafeReportsDir", defaultValue = "${project.build.directory}/failsafe-reports")
@@ -173,7 +192,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 		try (Writer writer = new PrintWriter(
 				new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
-			writer.write(YAML_LANG_SERVER_SCHEMA_INFO + System.lineSeparator());
+			writer.write(YAML_LANG_SERVER_SCHEMA_ANNOTATIONS + System.lineSeparator());
 			yamlMapper.writeValue(writer, combinedOutputNode);
 		}
 	}
@@ -188,12 +207,14 @@ public class RequirementsToolMojo extends AbstractMojo {
 		try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zipOut = new ZipOutputStream(fos)) {
 
 			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML), new File(topLevelDir));
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILESOFTWARE_VERIFICATION_CASES_YML),
+			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_SOFTWARE_VERIFICATION_CASES_YML),
 					new File(topLevelDir));
 			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML),
 					new File(topLevelDir));
 			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE),
 					new File(topLevelDir));
+
+			addReqtoolConfigYamlToZip(zipOut, new File(topLevelDir));
 
 			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir,
 					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_FAILSAFE));
@@ -246,6 +267,46 @@ public class RequirementsToolMojo extends AbstractMojo {
 		File zipFile = new File(outputDirectory, zipArtifactFilename);
 		getLog().info("Attaching artifact: " + zipFile.getName());
 		projectHelper.attachArtifact(project, "zip", "reqstool", zipFile);
+	}
+
+	private void addReqtoolConfigYamlToZip(ZipOutputStream zipOut, File topLevelDir) throws IOException {
+		DumperOptions options = new DumperOptions();
+		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		options.setPrettyFlow(true);
+		Yaml yaml = new Yaml(options);
+
+		LinkedHashMap<String, Object> yamlData = new LinkedHashMap<>();
+		yamlData.put("language", "java");
+		yamlData.put("build", "maven");
+
+		LinkedHashMap<String, Object> resources = new LinkedHashMap<>();
+		if (requirementsAnnotationsFile.exists()) {
+			resources.put("requirements", INPUT_FILE_REQUIREMENTS_YML);
+		}
+		if (svcsAnnotationsFile.exists()) {
+			resources.put("software_verification_cases", INPUT_FILE_SOFTWARE_VERIFICATION_CASES_YML);
+		}
+		if (mvrsAnnotationsFile.exists()) {
+			resources.put("manual_verification_results", INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML);
+		}
+		if (annotationsFile.exists()) {
+			resources.put("annotations", OUTPUT_FILE_ANNOTATIONS_YML_FILE);
+		}
+
+		resources.put("test_results", Arrays.asList(INPUT_DIR_TEST_RESULTS_FAILSAFE, INPUT_DIR_TEST_RESULTS_SUREFIRE));
+
+		yamlData.put("resources", resources);
+
+		ZipEntry zipEntry = new ZipEntry(new File(topLevelDir, OUTPUT_FILE_REQSTOOL_CONFIG_YML).toString());
+		zipOut.putNextEntry(zipEntry);
+
+		Writer writer = new OutputStreamWriter(zipOut, StandardCharsets.UTF_8);
+		writer.write(String.format("%s%n", YAML_LANG_SERVER_SCHEMA_CONFIG));
+		writer.write(String.format("# version: %s%n", project.getVersion()));
+		yaml.dump(yamlData, writer);
+		writer.flush();
+
+		zipOut.closeEntry();
 	}
 
 }
