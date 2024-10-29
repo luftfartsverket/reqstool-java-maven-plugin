@@ -62,42 +62,40 @@ class RequirementsToolMojoTests {
 		build.setFinalName("test-project");
 		mockProject.setBuild(build);
 
-		// Set all required fields
-		setFieldValue(mojo, "project", mockProject);
-		setFieldValue(mojo, "outputDirectory", zipResourcePath.toFile());
-		setFieldValue(mojo, "datasetPath", zipResourcePath.toFile());
-		setFieldValue(mojo, "failsafeReportsDir", zipResourcePath.toFile());
-		setFieldValue(mojo, "surefireReportsDir", zipResourcePath.toFile());
-		setFieldValue(mojo, "requirementsAnnotationsFile", createTestFile(zipResourcePath, "requirements.yml"));
-		setFieldValue(mojo, "svcsAnnotationsFile", createTestFile(zipResourcePath, "software_verification_cases.yml"));
-		setFieldValue(mojo, "mvrsAnnotationsFile", createTestFile(zipResourcePath, "manual_verification_results.yml"));
-		setFieldValue(mojo, "annotationsFile", createTestFile(zipResourcePath, "annotations.yml"));
+		// Set the basedir in MavenProject using reflection
+		Field basedirField = mockProject.getClass().getDeclaredField("basedir");
+		basedirField.setAccessible(true);
+		basedirField.set(mockProject, zipResourcePath.toFile());
+
+		// Set up all required fields
+		Field projectField = RequirementsToolMojo.class.getDeclaredField("project");
+		Field outputDirectoryField = RequirementsToolMojo.class.getDeclaredField("outputDirectory");
+		Field datasetPathField = RequirementsToolMojo.class.getDeclaredField("datasetPath");
+		Field testResultsField = RequirementsToolMojo.class.getDeclaredField("testResults");
+
+		projectField.setAccessible(true);
+		outputDirectoryField.setAccessible(true);
+		datasetPathField.setAccessible(true);
+		testResultsField.setAccessible(true);
+
+		projectField.set(mojo, mockProject);
+		outputDirectoryField.set(mojo, zipResourcePath.toFile());
+		datasetPathField.set(mojo, zipResourcePath.toFile());
+		testResultsField.set(mojo, new String[] { "test_results/**/*.xml" });
+
+		// Create mandatory requirements.yml file
+		File reqFile = new File(zipResourcePath.toFile(), "requirements.yml");
+		reqFile.getParentFile().mkdirs();
+		reqFile.createNewFile();
+		Files.write(reqFile.toPath(), "test content".getBytes());
 
 		// Invoke the method
 		Method assembleZipArtifactMethod = RequirementsToolMojo.class.getDeclaredMethod("assembleZipArtifact");
 		assembleZipArtifactMethod.setAccessible(true);
 		assembleZipArtifactMethod.invoke(mojo);
 
+		// Only check if zip file exists
 		assertTrue(Files.exists(zipResourcePath.resolve("test-project-reqstool.zip")));
-	}
-
-	// Helper method to set field values
-	private void setFieldValue(Object object, String fieldName, Object value) throws Exception {
-		Field field = RequirementsToolMojo.class.getDeclaredField(fieldName);
-		field.setAccessible(true);
-		field.set(object, value);
-	}
-
-	// Helper method to create test files
-	private File createTestFile(Path directory, String filename) throws IOException {
-		File file = new File(directory.toFile(), filename);
-		if (!file.exists()) {
-			file.getParentFile().mkdirs();
-			file.createNewFile();
-			// Optionally write some content to the file
-			Files.write(file.toPath(), "test content".getBytes());
-		}
-		return file;
 	}
 
 }
