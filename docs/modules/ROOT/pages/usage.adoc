@@ -14,6 +14,9 @@ To use the LFV Reqstool Java Maven Plugin, add the following configuration to yo
                     <goals>
                         <goal>assemble-and-attach-zip-artifact</goal>
                     </goals>
+                    <!-- The plugin runs in the 'verify' phase by default. -->
+                    <!-- You can override this by uncommenting and modifying the phase below: -->
+                    <!--<phase>verify</phase>-->
                 </execution>
             </executions>
             <dependencies>
@@ -27,3 +30,7 @@ To use the LFV Reqstool Java Maven Plugin, add the following configuration to yo
     </plugins>
 </build>
 ```
+
+The default `<phase>` the plugin runs during is `verify`.
+
+
