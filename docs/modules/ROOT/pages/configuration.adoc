@@ -24,7 +24,7 @@ Defaults to the value set below.
 ```xml
 <configuration>
   <svcsAnnotationsFile>
-    ${project.build.directory}/generated-test-sources/test-annotations/resources/annotations
+    ${project.build.directory}/generated-test-sources/test-annotations/resources/annotations.yml
   </svcsAnnotationsFile>
 </configuration>
 
@@ -58,34 +58,6 @@ Defaults to the value set below.
 
 ```
 
-=== failsafeReportsDir
-
-The `failsafeReportsDir` parameter specifies the path to where the failsafe reports are found. 
-Defaults to the value set below. 
-
-```xml
-<configuration>
-  <failsafeReportsDir>
-    ${project.build.directory}/failsafe-reports
-  </failsafeReportsDir>
-</configuration>
-
-```
-
-=== surefireReportsDir
-
-The `surefireReportsDir` parameter specifies the path to where the surefire reports are found. 
-Defaults to the value set below. 
-
-```xml
-<configuration>
-  <surefireReportsDir>
-    ${project.build.directory}/surefire-reports
-  </surefireReportsDir>
-</configuration>
-
-```
-
 === project
 
 The `project` parameter specifies the name of the maven project 
@@ -96,6 +68,20 @@ Defaults to the value set below.
   <project>
     ${project}
   </project>
+</configuration>
+
+```
+
+=== testResults
+
+The `testResults` parameter specifies one or more testResult paths
+
+```xml
+<configuration>
+  <testResults>
+    <testResult>path/to/test/result.xml</testResult>
+    <testResult>path/to/test/result.xml</testResult>
+  </testResults>
 </configuration>
 
 ```
@@ -114,4 +100,44 @@ Defaults to the value set below.
 
 ```
 
+=== skip
 
+Skip the execution of the plugin.
+Defaults to the value set below. 
+
+```xml
+<configuration>
+  <skip>
+    false
+  </skip>
+</configuration>
+
+```
+
+=== skipAssembleZipArtifact
+
+Skip zip artifact assembly.
+Defaults to the value set below. 
+
+```xml
+<configuration>
+  <skipAssembleZipArtifact>
+    false
+  </skipAssembleZipArtifact>
+</configuration>
+
+```
+
+=== skipAttachZipArtifact
+
+Skip zip artifact attachment.
+Defaults to the value set below. 
+
+```xml
+<configuration>
+  <skipAttachZipArtifact>
+    false
+  </skipAttachZipArtifact>
+</configuration>
+
+```

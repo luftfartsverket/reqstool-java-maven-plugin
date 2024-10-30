@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -48,12 +47,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
-@Mojo(name = "assemble-and-attach-zip-artifact", defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "assemble-and-attach-zip-artifact", defaultPhase = LifecyclePhase.VERIFY)
 public class RequirementsToolMojo extends AbstractMojo {
 
 	// Constants
-
-	private static final String TEST_RESULTS_PATTERN = "test_results/**/*.xml";
 
 	public static final String INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML = "manual_verification_results.yml";
 
@@ -103,7 +100,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 			defaultValue = "${project.build.directory}/reqstool/annotations.yml")
 	private File annotationsFile;
 
-	@Parameter(property = "reqstool.datasetPath", defaultValue = "${project.basedir}/docs/reqstool")
+	@Parameter(property = "reqstool.datasetPath", defaultValue = "${project.basedir}/reqstool")
 	private File datasetPath;
 
 	@Parameter(property = "reqstool.testResults")
@@ -134,7 +131,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 		}
 
 		getLog().debug("Assembling and Attaching Reqstool Maven Zip Artifact");
-		getLog().info(Arrays.toString(testResults));
+		getLog().info("testResults: " + Arrays.toString(testResults));
 		try {
 
 			JsonNode implementationsNode = yamlMapper.createObjectNode();
@@ -223,26 +220,26 @@ public class RequirementsToolMojo extends AbstractMojo {
 			}
 
 			addFileToZipArtifact(zipOut, requirementsFile, new File(topLevelDir));
-			getLog().debug("added to " + topLevelDir + ": " + requirementsFile);
-			reqstoolConfigResources.put("requirements", INPUT_FILE_REQUIREMENTS_YML);
+			getLog().info("added to " + topLevelDir + ": " + requirementsFile);
+			reqstoolConfigResources.put("requirements", requirementsFile.getName());
 
 			File svcsFile = new File(datasetPath, INPUT_FILE_SOFTWARE_VERIFICATION_CASES_YML);
 			if (svcsFile.isFile()) {
 				addFileToZipArtifact(zipOut, svcsFile, new File(topLevelDir));
-				getLog().debug("added to " + topLevelDir + ": " + svcsFile);
-				reqstoolConfigResources.put("software_verification_cases", INPUT_FILE_SOFTWARE_VERIFICATION_CASES_YML);
+				getLog().info("added to " + topLevelDir + ": " + svcsFile);
+				reqstoolConfigResources.put("software_verification_cases", svcsFile.getName());
 			}
 			File mvrsFile = new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML);
 			if (mvrsFile.isFile()) {
 				addFileToZipArtifact(zipOut, mvrsFile, new File(topLevelDir));
-				getLog().debug("added to " + topLevelDir + ": " + mvrsFile);
-				reqstoolConfigResources.put("manual_verification_results", INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML);
+				getLog().info("added to " + topLevelDir + ": " + mvrsFile);
+				reqstoolConfigResources.put("manual_verification_results", mvrsFile.getName());
 			}
 			File annotationsZipFile = new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE);
 			if (annotationsZipFile.isFile()) {
 				addFileToZipArtifact(zipOut, annotationsZipFile, new File(topLevelDir));
-				getLog().debug("added to " + topLevelDir + ": " + annotationsZipFile);
-				reqstoolConfigResources.put("annotations", OUTPUT_FILE_ANNOTATIONS_YML_FILE);
+				getLog().info("added to " + topLevelDir + ": " + annotationsZipFile);
+				reqstoolConfigResources.put("annotations", annotationsZipFile.getName());
 			}
 
 			Path dir = Paths.get(project.getBasedir().toURI());
@@ -260,10 +257,10 @@ public class RequirementsToolMojo extends AbstractMojo {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					Path relativePath = dir.relativize(file);
-					getLog().debug("Checking file: " + relativePath);
+					getLog().info("Checking file: " + relativePath);
 
 					if (matchers.stream().anyMatch(matcher -> matcher.matches(relativePath))) {
-						getLog().debug("Match found for: " + relativePath);
+						getLog().info("Match found for: " + relativePath);
 						addFileToZipArtifact(zipOut, file.toFile(),
 								new File(topLevelDir, OUTPUT_ARTIFACT_DIR_TEST_RESULTS));
 						testResultsCount.incrementAndGet();
@@ -272,10 +269,10 @@ public class RequirementsToolMojo extends AbstractMojo {
 				}
 			});
 
-			getLog().debug("testResults values: " + Arrays.toString(testResults));
-			getLog().debug("added " + testResultsCount + " test_results");
-			getLog().debug("added test results: " + TEST_RESULTS_PATTERN);
-			reqstoolConfigResources.put("test_results", TEST_RESULTS_PATTERN);
+			getLog().info("testResults values: " + Arrays.toString(testResults));
+			getLog().info("added " + testResultsCount + " test_results");
+			getLog().info("added test results: " + Arrays.toString(testResults));
+			reqstoolConfigResources.put("test_results", OUTPUT_ARTIFACT_DIR_TEST_RESULTS);
 
 			addReqstoolConfigYamlToZip(zipOut, new File(topLevelDir), reqstoolConfigResources);
 		}

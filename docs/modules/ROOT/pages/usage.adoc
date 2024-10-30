@@ -8,11 +8,11 @@ To use the LFV Reqstool Java Maven Plugin, add the following configuration to yo
         <plugin>
             <groupId>se.lfv.reqstool</groupId>
             <artifactId>reqstool-maven-plugin</artifactId>
-            <version>0.0.2</version>
+            <version>0.1.0</version>
             <executions>
                 <execution>
                     <goals>
-                        <goal>attach-reqstool-zip</goal>
+                        <goal>assemble-and-attach-zip-artifact</goal>
                     </goals>
                 </execution>
             </executions>
