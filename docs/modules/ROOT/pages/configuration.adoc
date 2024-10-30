@@ -1,17 +1,61 @@
 == Configuration
 
-To configure the plugin add a <configuration> block for the plugin under the <build> in pom.xml
+To configure the plugin add a `<configuration>` block for the plugin under the `<build>` in pom.xml.
+
+== Complete Configuration Example
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>se.lfv.reqstool</groupId>
+            <artifactId>reqstool-maven-plugin</artifactId>
+            <version>0.1.0</version>
+            <configuration>
+                <!-- File Paths -->
+                <requirementsAnnotationsFile>
+                  ${project.build.directory}/generated-sources/annotations/resources/annotations.yml
+                </requirementsAnnotationsFile>
+                <svcsAnnotationsFile>
+                  ${project.build.directory}/generated-test-sources/test-annotations/resources/annotations.yml
+                </svcsAnnotationsFile>
+                <outputDirectory>
+                  ${project.build.directory}/reqstool
+                </outputDirectory>
+                <datasetPath>${project.basedir}/reqstool</datasetPath>
+
+                <!-- Test Results -->
+                <testResults>
+                    <testResult>target/surefire-reports/**/*.xml</testResult>
+                    <testResult>target/failsafe-reports/**/*.xml</testResult>
+                </testResults>
+
+                <!-- Project Reference -->
+                <project>${project}</project>
+                <log>${log}</log>
+
+                <!-- Execution Controls -->
+                <skip>false</skip>
+                <skipAssembleZipArtifact>false</skipAssembleZipArtifact>
+                <skipAttachZipArtifact>false</skipAttachZipArtifact>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+== Configuration Parameters
 
 === requirementsAnnotationsFile
 
 The `requirementsAnnotationsFile` parameter specifies the path to the requirements annotations file.
-Defaults to the value set below. 
+Defaults to the value set below.
 
 ```xml
 <configuration>
-  <requirementsAnnotationsFile>
-    ${project.build.directory}/generated-sources/annotations/resources/annotations.yml
-  </requirementsAnnotationsFile>
+    <requirementsAnnotationsFile>
+        ${project.build.directory}/generated-sources/annotations/resources/annotations.yml
+    </requirementsAnnotationsFile>
 </configuration>
 
 ```
@@ -19,99 +63,132 @@ Defaults to the value set below.
 === svcsAnnotationsFile
 
 The `svcsAnnotationsFile` parameter specifies the path to the svcs annotations file.
-Defaults to the value set below. 
+Defaults to the value set below.
 
 ```xml
 <configuration>
-  <svcsAnnotationsFile>
-    ${project.build.directory}/generated-test-sources/test-annotations/resources/annotations
-  </svcsAnnotationsFile>
+    <svcsAnnotationsFile>
+        ${project.build.directory}/generated-test-sources/test-annotations/resources/annotations.yml
+    </svcsAnnotationsFile>
 </configuration>
 
 ```
 
 === outputDirectory
 
-The `outputDirectory` parameter specifies the path to where to put the generated output
-Defaults to the value set below. 
+The `outputDirectory` parameter specifies the path to where to put the generated output.
+Defaults to the value set below.
 
 ```xml
 <configuration>
-  <outputDirectory>
-    ${project.build.directory}/reqstool
-  </outputDirectory>
+    <outputDirectory>
+        ${project.build.directory}/reqstool
+    </outputDirectory>
 </configuration>
 
 ```
 
 === datasetPath
 
-The `datasetPath` parameter specifies the path to the dataset
-Defaults to the value set below. 
+The `datasetPath` parameter specifies the path to the dataset.
+Defaults to the value set below.
 
 ```xml
 <configuration>
-  <datasetPath>
-    ${project.basedir}/reqstool
-  </datasetPath>
-</configuration>
-
-```
-
-=== failsafeReportsDir
-
-The `failsafeReportsDir` parameter specifies the path to where the failsafe reports are found. 
-Defaults to the value set below. 
-
-```xml
-<configuration>
-  <failsafeReportsDir>
-    ${project.build.directory}/failsafe-reports
-  </failsafeReportsDir>
-</configuration>
-
-```
-
-=== surefireReportsDir
-
-The `surefireReportsDir` parameter specifies the path to where the surefire reports are found. 
-Defaults to the value set below. 
-
-```xml
-<configuration>
-  <surefireReportsDir>
-    ${project.build.directory}/surefire-reports
-  </surefireReportsDir>
+    <datasetPath>
+        ${project.basedir}/reqstool
+    </datasetPath>
 </configuration>
 
 ```
 
 === project
 
-The `project` parameter specifies the name of the maven project 
-Defaults to the value set below. 
+The `project` parameter specifies the name of the maven project.
+Defaults to the value set below.
 
 ```xml
 <configuration>
-  <project>
-    ${project}
-  </project>
+    <project>
+        ${project}
+    </project>
+</configuration>
+
+```
+
+=== testResults
+
+The `testResults` parameter specifies one or more testResult paths.
+
+```xml
+<configuration>
+    <testResults>
+        <testResult>path/to/test/result.xml</testResult>
+        <testResult>path/to/test/result.xml</testResult>
+    </testResults>
 </configuration>
 
 ```
 
 === log
 
-The `log` parameter specifies the log
-Defaults to the value set below. 
+The `log` parameter specifies the log.
+Defaults to the value set below.
 
 ```xml
 <configuration>
-  <log>
-    ${log}
-  </log>
+    <log>
+        ${log}
+    </log>
 </configuration>
 
 ```
 
+=== skip
 
+Skip the execution of the plugin.
+Defaults to the value set below.
+
+```xml
+<configuration>
+    <skip>
+        false
+    </skip>
+</configuration>
+
+```
+
+=== skipAssembleZipArtifact
+
+Skip zip artifact assembly.
+Defaults to the value set below.
+
+```xml
+<configuration>
+    <skipAssembleZipArtifact>
+        false
+    </skipAssembleZipArtifact>
+</configuration>
+
+```
+
+=== skipAttachZipArtifact
+
+Skip zip artifact attachment.
+Defaults to the value set below.
+
+```xml
+<configuration>
+    <skipAttachZipArtifact>
+        false
+    </skipAttachZipArtifact>
+</configuration>
+
+```
+
+Notes:
+
+* All path parameters support both absolute and relative paths
+* Maven property placeholders (`${...}`) can be used in all configuration values
+* The plugin executes in the `verify` phase by default
+* Test result paths support Ant-style pattern matching

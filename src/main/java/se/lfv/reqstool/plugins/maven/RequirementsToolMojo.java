@@ -8,7 +8,21 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -23,6 +37,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,22 +47,28 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
-@Mojo(name = "assemble-and-attach-zip-artifact", defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "assemble-and-attach-zip-artifact", defaultPhase = LifecyclePhase.VERIFY)
 public class RequirementsToolMojo extends AbstractMojo {
 
 	// Constants
 
-	public static final String INPUT_DIR_TEST_RESULTS_FAILSAFE = "test_results/failsafe";
-
-	public static final String INPUT_DIR_TEST_RESULTS_SUREFIRE = "test_results/surefire";
+	private static final String[] OUTPUT_ARTIFACT_TEST_RESULTS_PATTERN = { "test_results/**/*.xml" };
 
 	public static final String INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML = "manual_verification_results.yml";
 
 	public static final String INPUT_FILE_REQUIREMENTS_YML = "requirements.yml";
 
-	public static final String INPUT_FILESOFTWARE_VERIFICATION_CASES_YML = "software_verification_cases.yml";
+	public static final String INPUT_FILE_SOFTWARE_VERIFICATION_CASES_YML = "software_verification_cases.yml";
+
+	public static final String INPUT_PATH_DATASET = "reqstool";
 
 	public static final String OUTPUT_FILE_ANNOTATIONS_YML_FILE = "annotations.yml";
+
+	private static final String OUTPUT_ARTIFACT_CLASSIFIER = "reqstool";
+
+	public static final String OUTPUT_ARTIFACT_FILE_REQSTOOL_CONFIG_YML = "reqstool_config.yml";
+
+	public static final String OUTPUT_ARTIFACT_DIR_TEST_RESULTS = "test_results";
 
 	public static final String XML_IMPLEMENTATIONS = "implementations";
 
@@ -54,7 +76,9 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 	public static final String XML_TESTS = "tests";
 
-	protected static final String YAML_LANG_SERVER_SCHEMA_INFO = "# yaml-language-server: $schema=https://raw.githubusercontent.com/Luftfartsverket/reqstool-client/main/src/reqstool/resources/schemas/v1/annotations.schema.json";
+	protected static final String YAML_LANG_SERVER_SCHEMA_ANNOTATIONS = "# yaml-language-server: $schema=https://raw.githubusercontent.com/Luftfartsverket/reqstool-client/main/src/reqstool/resources/schemas/v1/annotations.schema.json";
+
+	protected static final String YAML_LANG_SERVER_SCHEMA_CONFIG = "# yaml-language-server: $schema=https://raw.githubusercontent.com/Luftfartsverket/reqstool-client/main/src/reqstool/resources/schemas/v1/reqstool_config.schema.json";
 
 	protected static final ObjectMapper yamlMapper;
 
@@ -63,25 +87,22 @@ public class RequirementsToolMojo extends AbstractMojo {
 		yamlMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
 	}
 
-	@Parameter(property = "requirementsAnnotationsFile",
+	@Parameter(property = "reqstool.requirementsAnnotationsFile",
 			defaultValue = "${project.build.directory}/generated-sources/annotations/resources/annotations.yml")
 	private File requirementsAnnotationsFile;
 
-	@Parameter(property = "svcsAnnotationsFile",
+	@Parameter(property = "reqstool.svcsAnnotationsFile",
 			defaultValue = "${project.build.directory}/generated-test-sources/test-annotations/resources/annotations.yml")
 	private File svcsAnnotationsFile;
 
-	@Parameter(property = "outputDirectory", defaultValue = "${project.build.directory}/reqstool")
+	@Parameter(property = "reqstool.outputDirectory", defaultValue = "${project.build.directory}/reqstool")
 	private File outputDirectory;
 
-	@Parameter(property = "datasetPath", defaultValue = "${project.basedir}/reqstool")
+	@Parameter(property = "reqstool.datasetPath", defaultValue = "${project.basedir}/reqstool")
 	private File datasetPath;
 
-	@Parameter(property = "failsafeReportsDir", defaultValue = "${project.build.directory}/failsafe-reports")
-	private File failsafeReportsDir;
-
-	@Parameter(property = "surefireReportsDir", defaultValue = "${project.build.directory}/surefire-reports")
-	private File surefireReportsDir;
+	@Parameter(property = "reqstool.testResults")
+	private String[] testResults;
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
@@ -108,7 +129,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 		}
 
 		getLog().debug("Assembling and Attaching Reqstool Maven Zip Artifact");
-
+		getLog().info("testResults: " + Arrays.toString(testResults));
 		try {
 
 			JsonNode implementationsNode = yamlMapper.createObjectNode();
@@ -173,12 +194,12 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 		try (Writer writer = new PrintWriter(
 				new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
-			writer.write(YAML_LANG_SERVER_SCHEMA_INFO + System.lineSeparator());
+			writer.write(YAML_LANG_SERVER_SCHEMA_ANNOTATIONS + System.lineSeparator());
 			yamlMapper.writeValue(writer, combinedOutputNode);
 		}
 	}
 
-	private void assembleZipArtifact() throws IOException {
+	private void assembleZipArtifact() throws IOException, MojoExecutionException {
 		String zipArtifactFilename = project.getBuild().getFinalName() + "-reqstool.zip";
 		String topLevelDir = project.getBuild().getFinalName() + "-reqstool";
 
@@ -187,37 +208,75 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 		try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zipOut = new ZipOutputStream(fos)) {
 
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML), new File(topLevelDir));
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILESOFTWARE_VERIFICATION_CASES_YML),
-					new File(topLevelDir));
-			addFileToZipArtifact(zipOut, new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML),
-					new File(topLevelDir));
-			addFileToZipArtifact(zipOut, new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE),
-					new File(topLevelDir));
+			Map<String, Object> reqstoolConfigResources = new HashMap<>();
 
-			addXmlFilesToZipArtifact(zipOut, failsafeReportsDir,
-					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_FAILSAFE));
-			addXmlFilesToZipArtifact(zipOut, surefireReportsDir,
-					new File(topLevelDir, INPUT_DIR_TEST_RESULTS_SUREFIRE));
+			File requirementsFile = new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML);
+			if (!requirementsFile.isFile()) {
+				String msg = "Missing mandatory " + INPUT_FILE_REQUIREMENTS_YML + ": "
+						+ requirementsFile.getAbsolutePath();
+				throw new MojoExecutionException(msg);
+			}
+
+			addFileToZipArtifact(zipOut, requirementsFile, new File(topLevelDir));
+			getLog().info("added to " + topLevelDir + ": " + requirementsFile);
+			reqstoolConfigResources.put("requirements", requirementsFile.getName());
+
+			File svcsFile = new File(datasetPath, INPUT_FILE_SOFTWARE_VERIFICATION_CASES_YML);
+			if (svcsFile.isFile()) {
+				addFileToZipArtifact(zipOut, svcsFile, new File(topLevelDir));
+				getLog().debug("added to " + topLevelDir + ": " + svcsFile);
+				reqstoolConfigResources.put("software_verification_cases", svcsFile.getName());
+			}
+			File mvrsFile = new File(datasetPath, INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML);
+			if (mvrsFile.isFile()) {
+				addFileToZipArtifact(zipOut, mvrsFile, new File(topLevelDir));
+				getLog().debug("added to " + topLevelDir + ": " + mvrsFile);
+				reqstoolConfigResources.put("manual_verification_results", mvrsFile.getName());
+			}
+			File annotationsZipFile = new File(outputDirectory, OUTPUT_FILE_ANNOTATIONS_YML_FILE);
+			if (annotationsZipFile.isFile()) {
+				addFileToZipArtifact(zipOut, annotationsZipFile, new File(topLevelDir));
+				getLog().debug("added to " + topLevelDir + ": " + annotationsZipFile);
+				reqstoolConfigResources.put("annotations", annotationsZipFile.getName());
+			}
+
+			Path dir = Paths.get(project.getBasedir().toURI());
+			List<String> patterns = Arrays.stream(testResults)
+				.map(pattern -> "glob:" + pattern)
+				.collect(Collectors.toList());
+
+			List<PathMatcher> matchers = patterns.stream()
+				.map(pattern -> FileSystems.getDefault().getPathMatcher(pattern))
+				.collect(Collectors.toList());
+
+			AtomicInteger testResultsCount = new AtomicInteger(0);
+
+			Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Path relativePath = dir.relativize(file);
+					getLog().debug("Checking file: " + relativePath);
+
+					if (matchers.stream().anyMatch(matcher -> matcher.matches(relativePath))) {
+						getLog().debug("Match found for: " + relativePath);
+						addFileToZipArtifact(zipOut, file.toFile(),
+								new File(topLevelDir, OUTPUT_ARTIFACT_DIR_TEST_RESULTS));
+						testResultsCount.incrementAndGet();
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
+
+			getLog().debug("testResults values: " + Arrays.toString(testResults));
+			getLog().debug("added " + testResultsCount + " test_results");
+			getLog().debug("added test results: " + Arrays.toString(testResults));
+			reqstoolConfigResources.put("test_results", OUTPUT_ARTIFACT_TEST_RESULTS_PATTERN);
+
+			addReqstoolConfigYamlToZip(zipOut, new File(topLevelDir), reqstoolConfigResources);
 		}
 
 		getLog().info("Assembled zip artifact: " + zipFile.getAbsolutePath());
 
-	}
-
-	private void addXmlFilesToZipArtifact(ZipOutputStream zipOut, File directory, File targetDirectory)
-			throws IOException {
-		File[] files = directory.listFiles();
-		if (files != null) {
-			for (File file : files) {
-				if (file.isDirectory()) {
-					addXmlFilesToZipArtifact(zipOut, file, new File(targetDirectory, file.toString()));
-				}
-				else if (file.isFile() && file.getName().toLowerCase(Locale.US).endsWith(".xml")) {
-					addFileToZipArtifact(zipOut, file, targetDirectory);
-				}
-			}
-		}
 	}
 
 	private void addFileToZipArtifact(ZipOutputStream zipOut, File file, File targetDirectory) throws IOException {
@@ -245,7 +304,32 @@ public class RequirementsToolMojo extends AbstractMojo {
 		String zipArtifactFilename = project.getBuild().getFinalName() + "-reqstool.zip";
 		File zipFile = new File(outputDirectory, zipArtifactFilename);
 		getLog().info("Attaching artifact: " + zipFile.getName());
-		projectHelper.attachArtifact(project, "zip", "reqstool", zipFile);
+		projectHelper.attachArtifact(project, "zip", OUTPUT_ARTIFACT_CLASSIFIER, zipFile);
+	}
+
+	private void addReqstoolConfigYamlToZip(ZipOutputStream zipOut, File topLevelDir,
+			Map<String, Object> reqstoolConfigResources) throws IOException {
+		DumperOptions options = new DumperOptions();
+		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		options.setPrettyFlow(true);
+		Yaml yaml = new Yaml(options);
+
+		LinkedHashMap<String, Object> yamlData = new LinkedHashMap<>();
+		yamlData.put("language", "java");
+		yamlData.put("build", "maven");
+
+		yamlData.put("resources", reqstoolConfigResources);
+
+		ZipEntry zipEntry = new ZipEntry(new File(topLevelDir, OUTPUT_ARTIFACT_FILE_REQSTOOL_CONFIG_YML).toString());
+		zipOut.putNextEntry(zipEntry);
+
+		Writer writer = new OutputStreamWriter(zipOut, StandardCharsets.UTF_8);
+		writer.write(String.format("%s%n", YAML_LANG_SERVER_SCHEMA_CONFIG));
+		writer.write(String.format("# version: %s%n", project.getVersion()));
+		yaml.dump(yamlData, writer);
+		writer.flush();
+
+		zipOut.closeEntry();
 	}
 
 }
