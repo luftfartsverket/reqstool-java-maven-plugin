@@ -1,4 +1,4 @@
-= Configuration
+== Configuration
 
 To configure the plugin add a `<configuration>` block for the plugin under the `<build>` in pom.xml.
 
@@ -186,7 +186,7 @@ Defaults to the value set below.
 
 ```
 
-Notes
+Notes:
 
 * All path parameters support both absolute and relative paths
 * Maven property placeholders (`${...}`) can be used in all configuration values
