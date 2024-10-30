@@ -52,6 +52,8 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 	// Constants
 
+	private static final String[] TEST_RESULTS_PATTERN = { "test_results/**/*.xml" };
+
 	public static final String INPUT_FILE_MANUAL_VERIFICATION_RESULTS_YML = "manual_verification_results.yml";
 
 	public static final String INPUT_FILE_REQUIREMENTS_YML = "requirements.yml";
@@ -210,7 +212,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 
 		try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zipOut = new ZipOutputStream(fos)) {
 
-			Map<String, String> reqstoolConfigResources = new HashMap<>();
+			Map<String, Object> reqstoolConfigResources = new HashMap<>();
 
 			File requirementsFile = new File(datasetPath, INPUT_FILE_REQUIREMENTS_YML);
 			if (!requirementsFile.isFile()) {
@@ -272,7 +274,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 			getLog().info("testResults values: " + Arrays.toString(testResults));
 			getLog().info("added " + testResultsCount + " test_results");
 			getLog().info("added test results: " + Arrays.toString(testResults));
-			reqstoolConfigResources.put("test_results", OUTPUT_ARTIFACT_DIR_TEST_RESULTS);
+			reqstoolConfigResources.put("test_results", TEST_RESULTS_PATTERN);
 
 			addReqstoolConfigYamlToZip(zipOut, new File(topLevelDir), reqstoolConfigResources);
 		}
@@ -310,7 +312,7 @@ public class RequirementsToolMojo extends AbstractMojo {
 	}
 
 	private void addReqstoolConfigYamlToZip(ZipOutputStream zipOut, File topLevelDir,
-			Map<String, String> reqstoolConfigResources) throws IOException {
+			Map<String, Object> reqstoolConfigResources) throws IOException {
 		DumperOptions options = new DumperOptions();
 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		options.setPrettyFlow(true);
